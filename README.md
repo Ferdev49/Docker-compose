@@ -80,23 +80,27 @@ proyecto4-docker-compose/
 
 1. **Clona el repositorio:**
 git clone https://github.com/Ferdev49/Docker-compose.git
+```
 cd Docker-compose
-
+```
 2. **Inicia los servicios en segundo plano:**
+```
 docker-compose up -d --build
-
+```
 3. **Monitorea los logs para verificar el arranque exitoso:**
+```
 docker-compose logs -f
-
+```
 Deberías ver que el backend levanta tras validar el estado de la base de datos:
 [INFO] ✅ DB ready / healthy
 [INFO] Running on http://0.0.0.0:5000
 [INFO] webpack compiled successfully
 
 4. **Accede a la aplicación:**
+```
 - **Interfaz de Usuario (Frontend):** http://localhost:3000
 - **Health Check de la API (Backend):** http://localhost:5000/health
-
+```
 ---
 
 ## 🎮 Uso y API Endpoints
