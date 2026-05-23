@@ -92,10 +92,11 @@ docker-compose up -d --build
 docker-compose logs -f
 ```
 Deberías ver que el backend levanta tras validar el estado de la base de datos:
-[INFO] ✅ DB ready / healthy
-[INFO] Running on http://0.0.0.0:5000
-[INFO] webpack compiled successfully
-
+```
+✅ DB ready / healthy
+Running on http://0.0.0.0:5000
+webpack compiled successfully
+```
 4. **Accede a la aplicación:**
 ```
 - **Interfaz de Usuario (Frontend):** http://localhost:3000
