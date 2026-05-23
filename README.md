@@ -1,50 +1,49 @@
 # Proyecto 4: Docker Multi-Container App
- 
+
 **Aplicación Full Stack con Docker Compose que demuestra orquestación de múltiples servicios.**
- 
+
 ## 📋 Descripción
- 
+
 Este proyecto implementa una **aplicación de gestión de tareas (Task Manager)** utilizando Docker Compose. Combina tres servicios independientes en una arquitectura containerizada:
- 
+
 - **Frontend:** React con Axios para consumir API
-- **Backend:** Flask REST API con psycopg2
-- **Base de datos:** PostgreSQL 15
-Todos los servicios se comunican a través de una red Docker personalizada y utilizan volúmenes para persistencia de datos.
- 
+- **Backend:** Flask REST API con SQLAlchemy y psycopg2
+- **Base de datos:** PostgreSQL 15 (Alpine)
+
+Todos los servicios se comunican a través de una red Docker personalizada y utilizan volúmenes nombrados para asegurar la persistencia de los datos.
+
 ---
- 
+
 ## 🏗️ Arquitectura
- 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │           Docker Compose Network                    │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐   │
-│  │   Frontend   │  │   Backend    │  │   DB     │   │
-│  │   (React)    │──│  (Flask)     │──│(Postgres)│   │
-│  │  :3000       │  │   :5000      │  │  :5432   │   │
+│  │   Frontend   │  │   Backend    │  │    DB    │   │
+│  │   (React)    │──│   (Flask)    │──│(Postgres)│   │
+│  │   :3000      │  │   :5000      │  │  :5432   │   │
 │  └──────────────┘  └──────────────┘  └──────────┘   │
 │       Port 3000         Port 5000       Port 5432   │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
- 
+
 ### Tecnologías Utilizadas
- 
+
 | Componente | Tecnología | Versión |
 |-----------|-----------|---------|
 | Frontend | React | 18.2.0 |
 | Backend | Flask | 3.0.0 |
 | Database | PostgreSQL | 15-alpine |
-| Containerization | Docker | 29.4.3+ |
-| Orquestación | Docker Compose | 5.1.3+ |
- 
+| Orquestación | Docker Compose | v2.20+ |
+
 ---
- 
+
 ## 📦 Estructura del Proyecto
- 
-```
+```text
+
 proyecto4-docker-compose/
 ├── frontend/                    # Aplicación React
 │   ├── public/
@@ -57,249 +56,150 @@ proyecto4-docker-compose/
 │   └── package.json            # Dependencias Node.js
 │
 ├── backend/                     # API Flask
-│   ├── app.py                  # Aplicación principal
-│   ├── requirements.txt         # Dependencias Python
+│   ├── app.py                  # Aplicación principal (Endpoints)
+│   ├── requirements.txt         # Dependencias Python (Flask, SQLAlchemy)
 │   └── Dockerfile              # Imagen del backend
 │
 ├── database/                    # Configuración de BD
-│   └── init.sql                # Script de inicialización
+│   └── init.sql                # Script de inicialización estructural
 │
-├── docker-compose.yml          # Orquestación de servicios
+├── docker-compose.yml          # Orquestación de servicios y redes
 └── README.md                   # Este archivo
 ```
- 
+
 ---
- 
+
 ## 🚀 Inicio Rápido
- 
-### Prerequisitos
- 
-- **Docker** 29.0
-- **Docker Compose** 5.0+ (incluido en Docker Desktop)
-- **Git** (para clonar el repo)
+
+### Prerrequisitos
+
+- **Docker Desktop** (Debe incluir soporte para Docker Compose v2 o superior)
+- **Git** (Para clonar el repositorio)
+
 ### Instalación
- 
+
 1. **Clona el repositorio:**
-```bash
 git clone https://github.com/Ferdev49/Docker-compose.git
 cd Docker-compose
-```
- 
-2. **Inicia los servicios:**
-```bash
-docker-compose up -d
-```
- 
-3. **Espera a que los servicios estén listos (~2 minutos):**
-```bash
+
+2. **Inicia los servicios en segundo plano:**
+docker-compose up -d --build
+
+3. **Monitorea los logs para verificar el arranque exitoso:**
 docker-compose logs -f
-```
- 
-Deberías ver:
-```
-✅ DB ready
-Running on http://0.0.0.0:5000
-webpack compiled successfully
-```
- 
+
+Deberías ver que el backend levanta tras validar el estado de la base de datos:
+[INFO] ✅ DB ready / healthy
+[INFO] Running on http://0.0.0.0:5000
+[INFO] webpack compiled successfully
+
 4. **Accede a la aplicación:**
-```
-http://localhost:3000
-```
- 
+- **Interfaz de Usuario (Frontend):** http://localhost:3000
+- **Health Check de la API (Backend):** http://localhost:5000/health
+
 ---
- 
-## 🎮 Uso
- 
-### Interfaz de Usuario
- 
-La aplicación permite:
- 
-- ✅ **Ver tareas:** Lista todas las tareas almacenadas
-- ✅ **Crear tareas:** Añade nuevas tareas con un título
-- ✅ **Marcar completadas:** Checkbox para marcar/desmarcar
-- ✅ **Eliminar tareas:** Botón "×" para eliminar
-### Endpoints de API
- 
-**Base URL:** `http://localhost:5000`
- 
+
+## 🎮 Uso y API Endpoints
+
+### Endpoints de la API REST
+
+Base URL: http://localhost:5000
+
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/tasks` | Obtiene todas las tareas |
-| POST | `/api/tasks` | Crea una nueva tarea |
-| PUT | `/api/tasks/<id>` | Actualiza estado de tarea |
-| DELETE | `/api/tasks/<id>` | Elimina una tarea |
-| GET | `/health` | Health check |
- 
-### Ejemplo de uso con curl
- 
-```bash
-# Obtener tareas
+| GET | /api/tasks | Obtiene todas las tareas |
+| POST | /api/tasks | Crea una nueva tarea |
+| PUT | /api/tasks/<id> | Actualiza estado de una tarea |
+| DELETE | /api/tasks/<id> | Elimina una tarea por ID |
+| GET | /health | Estado de salud del Backend |
+
+### Pruebas rápidas con curl
+
+# Obtener todas las tareas
 curl http://localhost:5000/api/tasks
- 
-# Crear tarea
+
+# Crear una nueva tarea
 curl -X POST http://localhost:5000/api/tasks \
   -H "Content-Type: application/json" \
-  -d '{"title":"Mi tarea"}'
- 
-# Marcar como completada
-curl -X PUT http://localhost:5000/api/tasks/1 \
-  -H "Content-Type: application/json" \
-  -d '{"completed":true}'
- 
-# Eliminar tarea
-curl -X DELETE http://localhost:5000/api/tasks/1
-```
- 
+  -d '{"title":"Configurar Github Actions"}'
+
 ---
- 
-## 📊 Variables de Entorno
- 
-### Base de Datos
- 
-```
-POSTGRES_USER: postgres
-POSTGRES_PASSWORD: postgres
-POSTGRES_DB: taskdb
-```
- 
-### Frontend
- 
-```
-REACT_APP_API_URL: http://localhost:5000
-```
- 
+
+## 📊 Variables de Entorno y Credenciales
+
+Las credenciales se encuentran centralizadas en el archivo docker-compose.yml para el aprovisionamiento de la base de datos y la inyección en el Backend de Flask:
+
+### Base de Datos & Backend Link
+POSTGRES_USER: appuser
+POSTGRES_PASSWORD: app_password
+POSTGRES_DB: app_db
+DATABASE_URL: postgresql://appuser:app_password@db:5432/app_db
+
 ---
- 
+
 ## 🔧 Comandos Útiles
- 
-### Docker Compose
- 
-```bash
-# Inicia servicios
-docker-compose up -d
- 
-# Ve los logs
-docker-compose logs -f
- 
-# Logs de un servicio específico
-docker-compose logs backend
- 
-# Ver estado de servicios
+
+### Gestión de Contenedores
+
+### Iniciar servicios construyendo imágenes desde cero
+```
+docker-compose up -d --build
+```
+
+### Ver estado y salud actual de los servicios
+```
 docker-compose ps
- 
-# Detén servicios
+```
+### Revisar logs en tiempo real de un servicio específico
+```
+docker-compose logs backend
+```
+### Detener los contenedores manteniendo el almacenamiento
+```
 docker-compose down
- 
-# Limpia volúmenes (resetea BD)
+```
+### Destruir contenedores y borrar volúmenes (Reinicializar base de datos)
+```
 docker-compose down -v
 ```
- 
-### Debugging
- 
-```bash
-# Accede a la consola de un contenedor
-docker-compose exec backend sh
- 
-# Ve logs detallados
-docker-compose logs --tail 100
- 
-# Reinicia un servicio
-docker-compose restart frontend
+### Conexión Directa a la Base de Datos
+
+Si necesitas interactuar directamente con el motor de PostgreSQL persistido dentro de Docker, ejecuta:
+
+### Acceso interactivo mediante CLI psql
 ```
- 
+docker-compose exec db psql -U appuser -d app_db
+```
+## Comando de prueba en la consola de Postgres
+```
+SELECT * FROM tasks;
+```
 ---
- 
-## 🗄️ Base de Datos
- 
-### Tabla `tasks`
- 
-```sql
+
+## 📝 Características de Infraestructura Implementadas
+
+- ✅ **Orquestación Multi-contenedor:** Flujo automatizado unificando Frontend, Backend y BD en un solo comando.
+- ✅ **Aislamiento de Red:** Uso de redes bridge nativas de Docker para denegar tráfico externo directo a la BD y permitir resolución por DNS interno (@db:5432).
+- ✅ **Persistencia del Estado:** Volúmenes nombrados (postgres_data) para prevenir la pérdida de información en ciclos de down/up.
+- ✅ **Arranque Secuencial Resiliente:** Uso de depends_on condicionado a service_healthy con pg_isready, garantizando que Flask no inicie hasta que Postgres acepte conexiones.
+- ✅ **Inicialización Automatizada:** Montaje de scripts SQL estructurales directo al punto de entrada (/docker-entrypoint-initdb.d/).
+
+---
+
+## 🗄️ Estructura SQL Base (init.sql)
+
 CREATE TABLE tasks (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    completed BOOLEAN DEFAULT FALSE
+    completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
- 
-### Conexión Directa
- 
-```bash
-# Accede a PostgreSQL
-docker-compose exec postgres psql -U postgres -d taskdb
- 
-# Consulta tareas
-SELECT * FROM tasks;
-```
- 
+
 ---
- 
-## 🐛 Solución de Problemas
- 
-### El frontend no carga
- 
-```bash
-# Reconstruye el contenedor
-docker-compose down
-docker-compose up -d --build
- 
-# Ve los logs
-docker-compose logs frontend
-```
- 
-### La API no responde
- 
-```bash
-# Verifica el backend
-docker-compose logs backend
- 
-# Prueba conexión
-curl http://localhost:5000/health
-```
- 
-### Problema de conexión a BD
- 
-```bash
-# Reinicia la BD
-docker-compose restart postgres
- 
-# Resetea volúmenes
-docker-compose down -v
-docker-compose up -d
-```
- 
----
- 
-## 📝 Características Implementadas
- 
-- ✅ **Múltiples contenedores orquestados** con Docker Compose
-- ✅ **Networking entre servicios** a través de red bridge
-- ✅ **Volúmenes persistentes** para datos de PostgreSQL
-- ✅ **Health checks** para cada servicio
-- ✅ **Variables de entorno** para configuración
-- ✅ **Dependencias de servicios** definidas correctamente
-- ✅ **CORS habilitado** en el backend para el frontend
-- ✅ **Inicialización automática** de la base de datos
----
- 
+
 ## 🎓 Aprendizajes Clave
- 
-Este proyecto demuestra:
- 
-1. **Containerización:** Crear y optimizar Dockerfiles
-2. **Orquestación:** Usar Docker Compose para múltiples servicios
-3. **Networking:** Comunicación entre contenedores
-4. **Persistencia:** Volúmenes y bases de datos
-5. **Full Stack:** Frontend, backend y base de datos
-6. **API REST:** Operaciones CRUD completas
----
- 
-## 🤝 Contribuciones
- 
-Las contribuciones son bienvenidas. Para cambios mayores:
- 
-1. Fork el repositorio
-2. Crea una rama (`git checkout -b feature/mejora`)
-3. Commit cambios (`git commit -m 'Añade mejora'`)
-4. Push a la rama (`git push origin feature/mejora`)
-5. Abre un Pull Request
+
+Este proyecto consolida conceptos fundamentales de ingeniería DevOps:
+1. **Containerización Avanzada:** Construcción y empaquetado de entornos Python y Node de forma aislada.
+2. **Políticas de Red y Seguridad en Docker:** Exposición controlada de puertos y manejo de variables de entorno de forma segura.
+3. **Depuración de Sistemas Distribuidos:** Análisis de trazas de error en entornos desacoplados mediante logs de contenedores.
